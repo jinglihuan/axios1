@@ -33,15 +33,16 @@ async.eachSeries(symptomname, function (item, callback) {
         if(_mp == '100%'){
             console.log('passed test✅'.green)
         }else{
-            console.log('failed ‼️'.underline.red)
+            console.log('failed !!!'.yellow.bgRed.bold)
 
         }
         console.log('\n')
         
         callback()
-    })
-})
 
+    })
+   
+})
 
 
 function matchPercent(a, b) {

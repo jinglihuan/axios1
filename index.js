@@ -5,81 +5,52 @@ var axios = require('axios')
 
 var async = require('async')
 
+var colors = require('colors');
+
 var Url = 'http://101.201.197.11:10000/api'
 
 var symptomname = require('./symptomname.js');
 
-var t = 0;
+console.log('\033[2J');
 
-async.each(symptomname, function (item, callback) {
-	t = t + 2000;
-	 _.delay(function () {
+async.eachSeries(symptomname, function (item, callback) {
 
-		axios.post(Url + '/disease', {
-			symptomName: item.a
-		}).then(function (resp) {
+    axios.post(Url + '/disease', {
+        symptomName: item.a
+    }).then(function (resp) {
 
-			var a = _.map(resp.data, 'diseaseName')
+        var expect = item.b.sort()
 
-			_.each(item.b, function (b) {
+        var data = _.chain(resp.data).map('diseaseName').compact().sort().value()
 
-				if(_.includes(a, b)) {
-					console.log(b + ' in ' + a , "passed\n\n\n\n\n\n\n\n");
-				} else { 
-					console.log(item.a, "failed");
-				}
-				callback()
-			 })
-		})
-	}, t)
+        var _mp = matchPercent(expect, data)
 
-}, function (err) {
-	if (err) 
-		console.log(err)
+        console.log('查询条件：', item.a)
+        console.log('预期结果：', expect)
+        console.log('实际返回：', data)
+        console.log('匹配程度：', _mp)
+        console.log('预期外结果：', _.difference(data, expect))
+        if(_mp == '100%'){
+            console.log('passed test✅'.green)
+        }else{
+            console.log('failed ‼️'.underline.red)
+
+        }
+        console.log('\n')
+        
+        callback()
+    })
 })
 
-// axios.post(Url + '/disease', {
-// 	symptomName: symptomname[]
-// }).then(function (resp) {
-// 	console.log(resp.data)
-// 	// _.each(resp.data, function (d) {
-// 	// 	console.log(d)
-// 	// 	// if (!Array.isArray(d)) {
-// 	// 	// 	console.log('\n\n\n\n\n', item, d)
-// 	// 	// 	callback()
-// 	// 	// } else {
-// 	// 	// 	console.log('\n\n\n\n\n', 'fail to fetch data and find empty array')
-// 	// 	// }
-// 	// })
-// })
-
-// setTimeout(function () {
 
 
-// axios.post(Url + '/disease', {
-// 	symptomName: symptomname[1]
-// }).then(function (resp) {
-// 	console.log('\n\n\n', resp.data)
-
-// 	console.log('second post')
-	
-// })
-
-// }, 1000)
-
-// setTimeout(function () {
-// axios.post(Url + '/disease', {
-// 	symptomName: symptomname[2]
-// }).then(function (resp) {
-// 	console.log('\n\n\n', resp.data)
-
-// 	console.log('third post')
-	
-// })
-
-// }, 2000)
-
-
-  
-
-
+function matchPercent(a, b) {
+    if (_.isEqual(a, b)) {
+        return '100%'
+    } else {
+        if (_.isEmpty(_.difference(a, b)))
+            return '100%'
+        else
+            return '未提供算法'
+    }
+}

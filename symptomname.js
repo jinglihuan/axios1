@@ -54,6 +54,6 @@ module.exports = [
 
 ]
 
-//curl -X POST {symptomName:"多尿","腹胀","乏力","发热","口渴","恶心"} http://101.201.197.11:10000/api/disease
+
 
 	
